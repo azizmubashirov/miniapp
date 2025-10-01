@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Presentation Creator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,35 +14,79 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #F2F5FA;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #F2F5FA 0%, #E8EEF7 50%, #D8E4F0 100%);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* Step Indicator */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            background: radial-gradient(circle at 20% 30%, rgba(24, 192, 193, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(201, 212, 228, 0.15) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
         .step-indicator {
-            padding: 20px;
-            background: white;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 20px 20px 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(201, 212, 228, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .steps-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
         }
 
         .steps {
             display: flex;
             justify-content: space-between;
             position: relative;
+            padding: 0 10px;
         }
 
         .steps::before {
             content: '';
             position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #C9D4E4;
+            top: 18px;
+            left: 30px;
+            right: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, #C9D4E4 0%, #C9D4E4 100%);
+            border-radius: 10px;
             z-index: 0;
+        }
+
+        .step-progress-line {
+            position: absolute;
+            top: 18px;
+            left: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, #18C0C1, #15a8a9);
+            border-radius: 10px;
+            z-index: 1;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(24, 192, 193, 0.4);
         }
 
         .step {
@@ -50,58 +94,78 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            z-index: 1;
+            z-index: 2;
+            gap: 8px;
         }
 
         .step-circle {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: #C9D4E4;
-            color: white;
+            background: rgba(201, 212, 228, 0.5);
+            color: #8494a8;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid #fdfdfd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .step.active .step-circle {
-            background: #18C0C1;
+            background: linear-gradient(135deg, #18C0C1, #15a8a9);
+            color: #fdfdfd;
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(24, 192, 193, 0.4);
         }
 
         .step.completed .step-circle {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #18C0C1, #14b0b1);
+            color: #fdfdfd;
+            box-shadow: 0 4px 12px rgba(24, 192, 193, 0.3);
         }
 
         .step-label {
-            font-size: 10px;
-            color: #666;
+            font-size: 11px;
+            color: #8494a8;
+            font-weight: 600;
             text-align: center;
+            transition: all 0.3s;
+            letter-spacing: 0.3px;
         }
 
-        /* Container */
+        .step.active .step-label {
+            color: #18C0C1;
+            transform: translateY(-2px);
+        }
+
+        .step.completed .step-label {
+            color: #18C0C1;
+        }
+
         .container {
-            padding: 20px;
-            max-width: 500px;
+            padding: 25px 20px 100px;
+            max-width: 520px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Section */
         .section {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .section.active {
             display: block;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -109,155 +173,239 @@
             }
         }
 
-        /* Card */
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: 28px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
         }
 
         .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
         }
 
-        /* Language Selection */
         .language-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 14px;
         }
 
         .language-item {
-            padding: 15px;
-            background: #C9D4E4;
-            border-radius: 12px;
+            padding: 20px 16px;
+            background: linear-gradient(135deg, #C9D4E4 0%, #d5dfe9 100%);
+            border-radius: 16px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 15px;
+            color: #4a5568;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .language-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(24, 192, 193, 0.1), rgba(24, 192, 193, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .language-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(24, 192, 193, 0.2);
+            border-color: rgba(24, 192, 193, 0.3);
+        }
+
+        .language-item:hover::before {
+            opacity: 1;
         }
 
         .language-item.selected {
-            background: #18C0C1;
-            color: white;
+            background: linear-gradient(135deg, #18C0C1, #15a8a9);
+            color: #fdfdfd;
+            border-color: #18C0C1;
+            box-shadow: 0 8px 28px rgba(24, 192, 193, 0.4);
+            transform: translateY(-3px);
         }
 
-        /* Input Fields */
+        .language-item.selected::before {
+            opacity: 0;
+        }
+
+        .language-item .flag {
+            font-size: 24px;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d3748;
             font-size: 14px;
+            letter-spacing: 0.2px;
         }
 
         .form-input, .form-textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #C9D4E4;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: white;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fdfdfd;
+            color: #2d3748;
         }
 
         .form-input:focus, .form-textarea:focus {
             outline: none;
             border-color: #18C0C1;
-            box-shadow: 0 0 0 3px rgba(24, 192, 193, 0.1);
+            box-shadow: 0 0 0 4px rgba(24, 192, 193, 0.1), 0 2px 8px rgba(24, 192, 193, 0.15);
+            transform: translateY(-1px);
         }
 
         .form-textarea {
-            min-height: 120px;
+            min-height: 140px;
             resize: vertical;
+            line-height: 1.6;
         }
 
-        /* Template Selection */
         .template-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 14px;
         }
 
         .template-item {
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             aspect-ratio: 16/9;
-            background: #f0f0f0;
+            background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+            border: 3px solid transparent;
+        }
+
+        .template-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(24, 192, 193, 0.2), rgba(24, 192, 193, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1;
+        }
+
+        .template-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .template-item:hover::before {
+            opacity: 1;
         }
 
         .template-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .template-item:hover img {
+            transform: scale(1.05);
         }
 
         .template-item.selected {
-            border: 3px solid #18C0C1;
-            transform: scale(0.95);
+            border-color: #18C0C1;
+            box-shadow: 0 8px 28px rgba(24, 192, 193, 0.4);
+            transform: scale(0.98);
         }
 
         .template-item.selected::after {
             content: '✓';
             position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 25px;
-            height: 25px;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
             background: #18C0C1;
-            color: white;
+            color: #fdfdfd;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(24, 192, 193, 0.5);
+            animation: checkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* AI Generate Button */
+        @keyframes checkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
         .ai-generate-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            color: #fdfdfd;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            margin-top: 12px;
         }
 
         .ai-generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
-        /* Loading State */
+        .ai-generate-btn:active {
+            transform: translateY(-1px);
+        }
+
         .loader-container {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 50px 20px;
         }
 
         .loader-container.active {
@@ -265,9 +413,9 @@
         }
 
         .ai-loader {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
             position: relative;
         }
 
@@ -275,28 +423,28 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 4px solid transparent;
+            border: 5px solid transparent;
             border-top-color: #18C0C1;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
 
         .ai-loader-circle:nth-child(2) {
-            width: 70%;
-            height: 70%;
-            top: 15%;
-            left: 15%;
+            width: 75%;
+            height: 75%;
+            top: 12.5%;
+            left: 12.5%;
             border-top-color: #667eea;
-            animation: spin 0.8s linear infinite reverse;
+            animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
         }
 
         .ai-loader-circle:nth-child(3) {
-            width: 40%;
-            height: 40%;
-            top: 30%;
-            left: 30%;
+            width: 50%;
+            height: 50%;
+            top: 25%;
+            left: 25%;
             border-top-color: #764ba2;
-            animation: spin 0.6s linear infinite;
+            animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
 
         @keyframes spin {
@@ -305,131 +453,162 @@
         }
 
         .loader-text {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .loader-progress {
             font-size: 14px;
             color: #18C0C1;
             font-weight: 500;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        /* Preview Section */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         .slide-preview {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(201, 212, 228, 0.3);
+            transition: all 0.3s;
+        }
+
+        .slide-preview:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
         .slide-number {
             font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
+            color: #8494a8;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .slide-content {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            min-height: 150px;
-            position: relative;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f6 100%);
+            border-radius: 14px;
+            min-height: 160px;
         }
 
         .slide-title {
             font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
         }
 
         .slide-text {
             font-size: 14px;
-            color: #666;
-            line-height: 1.6;
+            color: #4a5568;
+            line-height: 1.7;
         }
 
         .slide-image {
             width: 100%;
-            height: 150px;
+            height: 160px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-top: 10px;
+            border-radius: 12px;
+            margin-top: 14px;
         }
 
-        /* Edit Controls */
         .edit-controls {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 14px;
         }
 
         .edit-btn {
-            padding: 8px 12px;
-            background: #C9D4E4;
-            border: none;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(201, 212, 228, 0.4);
+            border: 1px solid rgba(201, 212, 228, 0.6);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            color: #4a5568;
         }
 
         .edit-btn:hover {
             background: #18C0C1;
-            color: white;
+            border-color: #18C0C1;
+            color: #fdfdfd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 192, 193, 0.3);
         }
 
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 15px;
-            background: white;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            z-index: 99;
+            border-top: 1px solid rgba(201, 212, 228, 0.2);
         }
 
         .nav-btn {
             flex: 1;
-            padding: 15px;
+            padding: 16px 24px;
             border: none;
-            border-radius: 20px;
+            border-radius: 16px;
             font-size: 16px;
-            font-weight: 500;
-            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
         }
 
         .nav-btn.secondary {
-            background: #C9D4E4;
-            color: #333;
+            background: rgba(201, 212, 228, 0.3);
+            color: #4a5568;
+            border: 2px solid rgba(201, 212, 228, 0.5);
+        }
+
+        .nav-btn.secondary:hover {
+            background: rgba(201, 212, 228, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(201, 212, 228, 0.4);
         }
 
         .nav-btn.primary {
-            background: #18C0C1;
-            color: white;
+            background: linear-gradient(135deg, #18C0C1, #15a8a9);
+            color: #fdfdfd;
+            box-shadow: 0 6px 20px rgba(24, 192, 193, 0.3);
         }
 
-        .nav-btn:hover {
+        .nav-btn.primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 28px rgba(24, 192, 193, 0.4);
         }
 
         .nav-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -437,9 +616,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             padding: 20px;
+            animation: fadeIn 0.3s;
         }
 
         .modal.active {
@@ -449,50 +630,70 @@
         }
 
         .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 400px;
+            background: #fdfdfd;
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 450px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
         }
 
         .modal-close {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border: none;
-            background: #f0f0f0;
+            background: rgba(201, 212, 228, 0.3);
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            font-size: 18px;
+            color: #4a5568;
         }
 
         .modal-close:hover {
-            background: #e0e0e0;
+            background: rgba(201, 212, 228, 0.5);
+            transform: rotate(90deg);
         }
 
-        /* Success Animation */
         .success-animation {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
         }
 
         .success-animation.active {
@@ -500,185 +701,201 @@
         }
 
         .success-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: #4CAF50;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 28px;
+            background: linear-gradient(135deg, #10b981, #059669);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: scaleIn 0.5s ease;
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
         }
 
-        @keyframes scaleIn {
+        @keyframes successPop {
             0% {
                 transform: scale(0);
+                opacity: 0;
             }
             50% {
-                transform: scale(1.1);
+                transform: scale(1.15);
             }
             100% {
                 transform: scale(1);
+                opacity: 1;
             }
         }
 
         .success-icon svg {
-            width: 40px;
-            height: 40px;
-            fill: white;
+            width: 50px;
+            height: 50px;
+            fill: #fdfdfd;
         }
 
-        /* Responsive */
+        .success-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .success-text {
+            font-size: 16px;
+            color: #6b7c93;
+            line-height: 1.6;
+        }
+
         @media (max-width: 380px) {
             .container {
-                padding: 15px;
+                padding: 20px 16px 100px;
             }
-            
+            .card {
+                padding: 24px 20px;
+            }
             .step-label {
-                font-size: 9px;
+                font-size: 10px;
             }
-            
             .form-input, .form-textarea {
-                font-size: 13px;
+                font-size: 14px;
+                padding: 12px 14px;
+            }
+            .language-item {
+                padding: 18px 14px;
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Step Indicator -->
     <div class="step-indicator">
-        <div class="steps">
-            <div class="step active" data-step="1">
-                <div class="step-circle">1</div>
-                <div class="step-label">Til</div>
-            </div>
-            <div class="step" data-step="2">
-                <div class="step-circle">2</div>
-                <div class="step-label">Ma'lumot</div>
-            </div>
-            <div class="step" data-step="3">
-                <div class="step-circle">3</div>
-                <div class="step-label">Reja</div>
-            </div>
-            <div class="step" data-step="4">
-                <div class="step-circle">4</div>
-                <div class="step-label">Shablon</div>
-            </div>
-            <div class="step" data-step="5">
-                <div class="step-circle">5</div>
-                <div class="step-label">Ko'rish</div>
+        <div class="steps-wrapper">
+            <div class="step-progress-line" id="stepProgressLine"></div>
+            <div class="steps">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Til</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Ma'lumot</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Reja</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Shablon</div>
+                </div>
+                <div class="step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Ko'rish</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Step 1: Language Selection -->
         <div class="section active" id="step1">
             <div class="card">
                 <h2 class="card-title">Taqdimot tilini tanlang</h2>
                 <div class="language-grid">
-                    <div class="language-item" data-lang="uz">🇺🇿 O'zbekcha</div>
-                    <div class="language-item" data-lang="ru">🇷🇺 Ruscha</div>
-                    <div class="language-item" data-lang="en">🇬🇧 Inglizcha</div>
-                    <div class="language-item" data-lang="kk">🇰🇿 Qozoqcha</div>
+                    <div class="language-item" data-lang="uz">
+                        <span class="flag">🇺🇿</span>
+                        <span>O'zbekcha</span>
+                    </div>
+                    <div class="language-item" data-lang="ru">
+                        <span class="flag">🇷🇺</span>
+                        <span>Ruscha</span>
+                    </div>
+                    <div class="language-item" data-lang="en">
+                        <span class="flag">🇬🇧</span>
+                        <span>Inglizcha</span>
+                    </div>
+                    <div class="language-item" data-lang="kk">
+                        <span class="flag">🇰🇿</span>
+                        <span>Qozoqcha</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Step 2: Topic and Names -->
         <div class="section" id="step2">
             <div class="card">
                 <h2 class="card-title">Asosiy ma'lumotlar</h2>
-                
                 <div class="form-group">
                     <label class="form-label">Taqdimot mavzusi *</label>
                     <input type="text" class="form-input" id="topic" placeholder="Masalan: Sun'iy intellekt va uning istiqbollari">
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Ismingiz va familiyangiz *</label>
                     <input type="text" class="form-input" id="studentName" placeholder="Masalan: Abdullayev Jasur">
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">O'qituvchi ismi va familiyasi *</label>
                     <input type="text" class="form-input" id="teacherName" placeholder="Masalan: Karimov Botir">
                 </div>
-
                 <div class="form-group">
-                    <label class="form-label">Guruh raqami</label>
-                    <input type="text" class="form-input" id="groupNumber" placeholder="Masalan: 201-guruh">
+                    <label class="form-label">Maktab/Universitet nomi *</label>
+                    <input type="text" class="form-input" id="schoolName" placeholder="Masalan: Toshkent Davlat Pedagogika Universiteti">
                 </div>
             </div>
         </div>
 
-        <!-- Step 3: Plan -->
         <div class="section" id="step3">
             <div class="card">
-                <h2 class="card-title">Taqdimot rejasi</h2>
-                
+                <h2 class="card-title">Taqdimot rejasini kiriting</h2>
                 <div class="form-group">
-                    <label class="form-label">Reja (har bir band alohida qatorda)</label>
-                    <textarea class="form-textarea" id="planText" placeholder="1. Kirish&#10;2. Asosiy qism&#10;3. Xulosa"></textarea>
+                    <label class="form-label">Taqdimot rejasi *</label>
+                    <textarea class="form-textarea" id="outline" placeholder="Har bir satrda bitta mavzu yoki bo'lim yozing:&#10;&#10;1. Kirish&#10;2. Asosiy tushunchalar&#10;3. Amaliy qo'llanilishi&#10;4. Afzalliklari va kamchiliklari&#10;5. Xulosa"></textarea>
                 </div>
-
-                <button class="ai-generate-btn" onclick="generatePlan()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    AI orqali reja tuzish
+                <button class="ai-generate-btn" id="aiOutlineBtn">
+                    <span>✨</span>
+                    <span>AI yordamida reja yaratish</span>
                 </button>
             </div>
         </div>
 
-        <!-- Step 4: Template Selection -->
         <div class="section" id="step4">
             <div class="card">
-                <h2 class="card-title">Shablon tanlang</h2>
+                <h2 class="card-title">Dizayn shablonini tanlang</h2>
                 <div class="template-grid">
                     <div class="template-item" data-template="modern">
                         <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=225&fit=crop" alt="Modern">
                     </div>
-                    <div class="template-item" data-template="classic">
-                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=225&fit=crop" alt="Classic">
-                    </div>
                     <div class="template-item" data-template="minimal">
-                        <img src="https://images.unsplash.com/photo-1497366754035-f200581a8d4d?w=400&h=225&fit=crop" alt="Minimal">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=225&fit=crop" alt="Minimal">
                     </div>
-                    <div class="template-item" data-template="colorful">
-                        <img src="https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=225&fit=crop" alt="Colorful">
+                    <div class="template-item" data-template="creative">
+                        <img src="https://images.unsplash.com/photo-1497366754035-f200581a8d4d?w=400&h=225&fit=crop" alt="Creative">
+                    </div>
+                    <div class="template-item" data-template="professional">
+                        <img src="https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=225&fit=crop" alt="Professional">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- AI Generation Loading -->
-        <div class="section" id="aiLoading">
-            <div class="card">
-                <div class="loader-container active">
-                    <div class="ai-loader">
-                        <div class="ai-loader-circle"></div>
-                        <div class="ai-loader-circle"></div>
-                        <div class="ai-loader-circle"></div>
-                    </div>
-                    <div class="loader-text">AI taqdimot tayyorlamoqda...</div>
-                    <div class="loader-progress" id="loadingProgress">Ma'lumotlar tahlil qilinmoqda...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 5: Preview and Edit -->
         <div class="section" id="step5">
+            <div class="loader-container active">
+                <div class="ai-loader">
+                    <div class="ai-loader-circle"></div>
+                    <div class="ai-loader-circle"></div>
+                    <div class="ai-loader-circle"></div>
+                </div>
+                <div class="loader-text">AI taqdimot yaratmoqda...</div>
+                <div class="loader-progress" id="loadingProgress">Ma'lumotlar tahlil qilinmoqda...</div>
+            </div>
+        </div>
+
+        <div class="section" id="step6">
             <div class="card">
                 <h2 class="card-title">Taqdimotni ko'rish va tahrirlash</h2>
-                <div id="slidesContainer">
-                    <!-- Slides will be generated here -->
-                </div>
+                <div id="slidesContainer"></div>
             </div>
         </div>
 
-        <!-- Success Screen -->
         <div class="section" id="successScreen">
             <div class="card">
                 <div class="success-animation active">
@@ -687,58 +904,57 @@
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                         </svg>
                     </div>
-                    <h2 style="color: #333; margin-bottom: 10px;">Taqdimot tayyor!</h2>
-                    <p style="color: #666;">Taqdimotingiz muvaffaqiyatli yaratildi va yuborildi.</p>
+                    <h2 class="success-title">Taqdimot tayyor!</h2>
+                    <p class="success-text">Taqdimotingiz muvaffaqiyatli yaratildi va saqlandi.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="bottom-nav" id="bottomNav">
-        <button class="nav-btn secondary" onclick="previousStep()">Orqaga</button>
-        <button class="nav-btn primary" onclick="nextStep()">Keyingi</button>
+        <button class="nav-btn secondary" id="prevBtn">Orqaga</button>
+        <button class="nav-btn primary" id="nextBtn">Keyingi</button>
     </div>
 
-    <!-- Edit Modal -->
     <div class="modal" id="editModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Matnni tahrirlash</h3>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+                <button class="modal-close" id="closeModalBtn">✕</button>
             </div>
             <div class="form-group">
                 <textarea class="form-textarea" id="editTextarea" rows="10"></textarea>
             </div>
-            <button class="nav-btn primary" style="width: 100%;" onclick="saveEdit()">Saqlash</button>
+            <button class="nav-btn primary" style="width: 100%;" id="saveEditBtn">Saqlash</button>
         </div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
     <script>
-        // State Management
         let currentStep = 1;
         let presentationData = {
             language: '',
             topic: '',
             studentName: '',
             teacherName: '',
-            groupNumber: '',
-            plan: [],
+            schoolName: '',
+            outline: [],
             template: '',
             slides: []
         };
+        let currentEditSlide = null;
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            updateStepIndicator();
-            initTelegram();
+            initApp();
         });
 
-        // Event Listeners
+        function initApp() {
+            setupEventListeners();
+            updateStepIndicator();
+            updateProgressLine();
+            initTelegram();
+        }
+
         function setupEventListeners() {
-            // Language selection
             document.querySelectorAll('.language-item').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.language-item').forEach(l => l.classList.remove('selected'));
@@ -747,7 +963,6 @@
                 });
             });
 
-            // Template selection
             document.querySelectorAll('.template-item').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.template-item').forEach(t => t.classList.remove('selected'));
@@ -755,78 +970,99 @@
                     presentationData.template = this.dataset.template;
                 });
             });
+
+            document.getElementById('prevBtn').addEventListener('click', previousStep);
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('aiOutlineBtn').addEventListener('click', generateOutline);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
         }
 
-        // Step Navigation
         function nextStep() {
-            if (validateCurrentStep()) {
-                if (currentStep === 4) {
-                    // Start AI generation
-                    generatePresentation();
-                } else if (currentStep === 5) {
-                    // Final submission
-                    submitPresentation();
-                } else {
-                    currentStep++;
-                    showStep(currentStep);
-                }
+            if (!validateCurrentStep()) return;
+
+            if (currentStep === 4) {
+                generatePresentation();
+            } else if (currentStep === 6) {
+                submitPresentation();
+            } else {
+                currentStep++;
+                showStep(currentStep);
             }
         }
 
         function previousStep() {
-            if (currentStep > 1) {
+            if (currentStep > 1 && currentStep !== 5 && currentStep !== 6) {
                 currentStep--;
                 showStep(currentStep);
             }
         }
 
         function showStep(step) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
 
-            // Show current section
-            document.getElementById(`step${step}`).classList.add('active');
-            
-            // Update step indicator
+            const stepId = step === 6 ? 'step6' : `step${step}`;
+            document.getElementById(stepId).classList.add('active');
+
             updateStepIndicator();
-            
-            // Update navigation buttons
+            updateProgressLine();
             updateNavButtons();
         }
 
         function updateStepIndicator() {
             document.querySelectorAll('.step').forEach((step, index) => {
                 step.classList.remove('active', 'completed');
-                if (index + 1 < currentStep) {
+                const stepNum = index + 1;
+                
+                if (stepNum < currentStep || (currentStep === 6 && stepNum === 5)) {
                     step.classList.add('completed');
-                } else if (index + 1 === currentStep) {
+                } else if (stepNum === currentStep || (currentStep === 5 && stepNum === 5) || (currentStep === 6 && stepNum === 5)) {
                     step.classList.add('active');
                 }
             });
         }
 
+        function updateProgressLine() {
+            const line = document.getElementById('stepProgressLine');
+            const percentage = ((currentStep - 1) / 4) * 100;
+            line.style.width = `${percentage}%`;
+        }
+
         function updateNavButtons() {
-            const prevBtn = document.querySelector('.nav-btn.secondary');
-            const nextBtn = document.querySelector('.nav-btn.primary');
-            
-            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
-            nextBtn.style.flex = currentStep === 1 ? '1' : '';
-            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const bottomNav = document.getElementById('bottomNav');
+
+            if (currentStep === 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.flex = '1';
+            } else {
+                prevBtn.style.display = 'block';
+                nextBtn.style.flex = '';
+            }
+
             if (currentStep === 5) {
+                bottomNav.style.display = 'none';
+            } else if (currentStep === 6) {
+                bottomNav.style.display = 'flex';
                 nextBtn.textContent = 'Tasdiqlash';
             } else {
+                bottomNav.style.display = 'flex';
                 nextBtn.textContent = 'Keyingi';
             }
         }
 
-        // Validation
         function validateCurrentStep() {
             switch(currentStep) {
                 case 1:
                     if (!presentationData.language) {
-                        alert('Iltimos, tilni tanlang');
+                        showAlert('Iltimos, tilni tanlang');
                         return false;
                     }
                     break;
@@ -834,28 +1070,29 @@
                     const topic = document.getElementById('topic').value.trim();
                     const studentName = document.getElementById('studentName').value.trim();
                     const teacherName = document.getElementById('teacherName').value.trim();
+                    const schoolName = document.getElementById('schoolName').value.trim();
                     
-                    if (!topic || !studentName || !teacherName) {
-                        alert('Iltimos, barcha majburiy maydonlarni to\'ldiring');
+                    if (!topic || !studentName || !teacherName || !schoolName) {
+                        showAlert('Iltimos, barcha majburiy maydonlarni to\'ldiring');
                         return false;
                     }
                     
                     presentationData.topic = topic;
                     presentationData.studentName = studentName;
                     presentationData.teacherName = teacherName;
-                    presentationData.groupNumber = document.getElementById('groupNumber').value.trim();
+                    presentationData.schoolName = schoolName;
                     break;
                 case 3:
-                    const planText = document.getElementById('planText').value.trim();
-                    if (!planText) {
-                        alert('Iltimos, reja kiriting yoki AI orqali yarating');
+                    const outline = document.getElementById('outline').value.trim();
+                    if (!outline) {
+                        showAlert('Iltimos, reja kiriting yoki AI yordamida yarating');
                         return false;
                     }
-                    presentationData.plan = planText.split('\n').filter(line => line.trim());
+                    presentationData.outline = outline.split('\n').filter(line => line.trim());
                     break;
                 case 4:
                     if (!presentationData.template) {
-                        alert('Iltimos, shablon tanlang');
+                        showAlert('Iltimos, shablon tanlang');
                         return false;
                     }
                     break;
@@ -863,100 +1100,94 @@
             return true;
         }
 
-        // AI Functions
-        function generatePlan() {
-            const topic = presentationData.topic || document.getElementById('topic').value;
+        function showAlert(message) {
+            alert(message);
+        }
+
+        function generateOutline() {
+            const topic = document.getElementById('topic').value.trim();
             if (!topic) {
-                alert('Iltimos, avval mavzuni kiriting');
+                showAlert('Iltimos, avval mavzuni kiriting');
                 return;
             }
 
-            // Simulate AI plan generation
-            const planTextarea = document.getElementById('planText');
-            planTextarea.value = 'AI reja yaratmoqda...';
-            planTextarea.disabled = true;
+            const textarea = document.getElementById('outline');
+            const btn = document.getElementById('aiOutlineBtn');
+            
+            textarea.disabled = true;
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span><span>Yaratilmoqda...</span>';
 
             setTimeout(() => {
-                const generatedPlan = `1. Kirish - ${topic} haqida umumiy ma'lumot
+                const outline = `1. Kirish - ${topic} haqida umumiy ma'lumot
 2. ${topic}ning ahamiyati va dolzarbligi
 3. Asosiy tushunchalar va ta'riflar
-4. ${topic}ning afzalliklari
+4. ${topic}ning afzalliklari va imkoniyatlari
 5. Amaliy qo'llanilishi va misollar
-6. Muammolar va yechimlar
-7. Kelajak istiqbollari
+6. Muammolar va ularning yechimlari
+7. Kelajak istiqbollari va rivojlanish yo'nalishlari
 8. Xulosa va tavsiyalar`;
                 
-                planTextarea.value = generatedPlan;
-                planTextarea.disabled = false;
-            }, 1500);
+                textarea.value = outline;
+                textarea.disabled = false;
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨</span><span>AI yordamida reja yaratish</span>';
+            }, 2000);
         }
 
         function generatePresentation() {
-            // Show loading screen
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById('aiLoading').classList.add('active');
-            document.getElementById('bottomNav').style.display = 'none';
+            currentStep = 5;
+            showStep(5);
 
-            // Simulate progress updates
             const progressTexts = [
                 'Ma\'lumotlar tahlil qilinmoqda...',
                 'Kontent yaratilmoqda...',
                 'Rasmlar tanlanmoqda...',
                 'Dizayn qo\'llanilmoqda...',
-                'Oxirgi tekshiruv...'
+                'Yakuniy tekshiruv...'
             ];
 
-            let progressIndex = 0;
-            const progressInterval = setInterval(() => {
-                if (progressIndex < progressTexts.length) {
-                    document.getElementById('loadingProgress').textContent = progressTexts[progressIndex];
-                    progressIndex++;
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < progressTexts.length) {
+                    document.getElementById('loadingProgress').textContent = progressTexts[index];
+                    index++;
                 } else {
-                    clearInterval(progressInterval);
-                    generateSlides();
+                    clearInterval(interval);
+                    createSlides();
                 }
             }, 1500);
         }
 
-        function generateSlides() {
-            // Generate slides based on plan
+        function createSlides() {
             const slides = [
                 {
-                    id: 1,
                     title: presentationData.topic,
-                    content: `Tayyorladi: ${presentationData.studentName}\nGuruh: ${presentationData.groupNumber || 'Kiritilmagan'}\nRahbar: ${presentationData.teacherName}`,
+                    content: `Tayyorladi: ${presentationData.studentName}\n${presentationData.schoolName}\nRahbar: ${presentationData.teacherName}`,
                     image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=300&fit=crop'
                 }
             ];
 
-            // Add slides for each plan item
-            presentationData.plan.forEach((item, index) => {
+            presentationData.outline.forEach((item, idx) => {
                 slides.push({
-                    id: index + 2,
                     title: item,
-                    content: `Bu yerda ${item} haqida batafsil ma'lumot bo'ladi. AI tomonidan yaratilgan kontent mavzu bo'yicha chuqur tahlil va ma'lumotlarni o'z ichiga oladi.`,
-                    image: `https://source.unsplash.com/400x300/?${encodeURIComponent(item)}`
+                    content: `${item} bo'yicha batafsil ma'lumot. Bu yerda mavzu chuqur o'rganilgan, asosiy nuqtalar va muhim ma'lumotlar keltirilgan. Taqdimot AI tomonidan yaratilgan professional kontent bilan boyitilgan.`,
+                    image: `https://source.unsplash.com/400x300/?${encodeURIComponent(item.split(' ')[0])},technology`
                 });
             });
 
-            // Add conclusion slide
             slides.push({
-                id: slides.length + 1,
                 title: 'Xulosa',
-                content: `${presentationData.topic} mavzusi bo'yicha asosiy xulosalar va tavsiyalar. Kelgusidagi rivojlanish istiqbollari.`,
+                content: `${presentationData.topic} mavzusi bo'yicha asosiy xulosalar va natijalar. Kelajakda rivojlanish yo'nalishlari va tavsiyalar.`,
                 image: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400&h=300&fit=crop'
             });
 
             presentationData.slides = slides;
-            
-            // Show preview
+
             setTimeout(() => {
-                currentStep = 5;
-                showStep(5);
+                currentStep = 6;
+                showStep(6);
                 displaySlides();
-                document.getElementById('bottomNav').style.display = 'flex';
             }, 1000);
         }
 
@@ -965,49 +1196,35 @@
             container.innerHTML = '';
 
             presentationData.slides.forEach((slide, index) => {
-                const slideElement = document.createElement('div');
-                slideElement.className = 'slide-preview';
-                slideElement.innerHTML = `
+                const slideEl = document.createElement('div');
+                slideEl.className = 'slide-preview';
+                slideEl.innerHTML = `
                     <div class="slide-number">Slayd ${index + 1}</div>
                     <div class="slide-content">
                         <div class="slide-title">${slide.title}</div>
-                        <div class="slide-text" data-slide="${index}" data-field="content">${slide.content}</div>
-                        <img src="${slide.image}" alt="Slide ${index + 1}" class="slide-image" data-slide="${index}" data-field="image">
+                        <div class="slide-text">${slide.content}</div>
+                        <img src="${slide.image}" alt="Slide ${index + 1}" class="slide-image">
                         <div class="edit-controls">
-                            <button class="edit-btn" onclick="editText(${index}, 'content')">
-                                <span>✏️ Matnni tahrirlash</span>
-                            </button>
-                            <button class="edit-btn" onclick="changeImage(${index})">
-                                <span>🖼️ Rasmni almashtirish</span>
-                            </button>
+                            <button class="edit-btn" onclick="editSlide(${index})">✏️ Tahrirlash</button>
                         </div>
                     </div>
                 `;
-                container.appendChild(slideElement);
+                container.appendChild(slideEl);
             });
         }
 
-        // Edit Functions
-        let currentEditSlide = null;
-        let currentEditField = null;
-
-        function editText(slideIndex, field) {
-            currentEditSlide = slideIndex;
-            currentEditField = field;
+        function editSlide(index) {
+            currentEditSlide = index;
+            const slide = presentationData.slides[index];
             
-            const modal = document.getElementById('editModal');
-            const textarea = document.getElementById('editTextarea');
-            
-            textarea.value = presentationData.slides[slideIndex][field];
-            modal.classList.add('active');
+            document.getElementById('editTextarea').value = slide.content;
+            document.getElementById('editModal').classList.add('active');
         }
 
         function saveEdit() {
-            if (currentEditSlide !== null && currentEditField !== null) {
-                const newText = document.getElementById('editTextarea').value;
-                presentationData.slides[currentEditSlide][currentEditField] = newText;
-                
-                // Update display
+            if (currentEditSlide !== null) {
+                const newContent = document.getElementById('editTextarea').value;
+                presentationData.slides[currentEditSlide].content = newContent;
                 displaySlides();
                 closeModal();
             }
@@ -1016,85 +1233,35 @@
         function closeModal() {
             document.getElementById('editModal').classList.remove('active');
             currentEditSlide = null;
-            currentEditField = null;
         }
 
-        function changeImage(slideIndex) {
-            // Create file input
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        presentationData.slides[slideIndex].image = event.target.result;
-                        displaySlides();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-            input.click();
-        }
+        function submitPresentation() {
+            const btn = document.getElementById('nextBtn');
+            btn.disabled = true;
+            btn.textContent = 'Yuborilmoqda...';
 
-        // Final Submission
-        async function submitPresentation() {
-            // Disable button during submission
-            const submitBtn = document.querySelector('.nav-btn.primary');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Yuborilmoqda...';
-
-            try {
-                // Send data to Telegram or API
+            setTimeout(() => {
                 if (window.Telegram?.WebApp) {
                     window.Telegram.WebApp.sendData(JSON.stringify({
                         action: 'create_presentation',
                         data: presentationData
                     }));
-                } else {
-                    // For testing - send to API
-                    const response = await fetch('https://your-api.com/api/presentations', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(presentationData)
-                    });
-
-                    if (response.ok) {
-                        showSuccessScreen();
-                    } else {
-                        throw new Error('Submission failed');
-                    }
                 }
                 
-                // Show success for demo
-                setTimeout(() => {
-                    showSuccessScreen();
-                }, 1500);
-                
-            } catch (error) {
-                console.error('Error submitting presentation:', error);
-                alert('Xatolik yuz berdi. Qayta urinib ko\'ring.');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Tasdiqlash';
-            }
+                showSuccessScreen();
+            }, 1500);
         }
 
         function showSuccessScreen() {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('successScreen').classList.add('active');
             document.getElementById('bottomNav').style.display = 'none';
             
-            // Update step indicator
-            document.querySelectorAll('.step').forEach(step => {
-                step.classList.add('completed');
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active');
+                s.classList.add('completed');
             });
 
-            // Close app after 3 seconds (if in Telegram)
             if (window.Telegram?.WebApp) {
                 setTimeout(() => {
                     window.Telegram.WebApp.close();
@@ -1102,68 +1269,24 @@
             }
         }
 
-        // Telegram WebApp Integration
         function initTelegram() {
             if (window.Telegram?.WebApp) {
                 const tg = window.Telegram.WebApp;
-                
-                // Expand to full height
                 tg.expand();
-                
-                // Set colors
-                tg.setHeaderColor('#F2F5FA');
-                tg.setBackgroundColor('#F2F5FA');
-                
-                // Ready
                 tg.ready();
                 
-                // Back button handling
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => {
-                    if (currentStep > 1) {
-                        previousStep();
-                    } else {
-                        tg.close();
-                    }
-                });
-
-                // Get user data if available
                 if (tg.initDataUnsafe?.user) {
                     const user = tg.initDataUnsafe.user;
-                    // Pre-fill student name if available
-                    if (user.first_name || user.last_name) {
-                        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    if (fullName) {
                         setTimeout(() => {
-                            const studentNameField = document.getElementById('studentName');
-                            if (studentNameField && !studentNameField.value) {
-                                studentNameField.value = fullName;
-                            }
+                            const field = document.getElementById('studentName');
+                            if (field && !field.value) field.value = fullName;
                         }, 500);
                     }
                 }
             }
         }
-
-        // Keyboard handling for better UX
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                const activeElement = document.activeElement;
-                if (activeElement.tagName !== 'TEXTAREA') {
-                    e.preventDefault();
-                    nextStep();
-                }
-            }
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Handle window resize for Telegram viewport
-        window.addEventListener('resize', () => {
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.expand();
-            }
-        });
     </script>
 </body>
 </html>
