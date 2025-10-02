@@ -734,5 +734,31 @@
             document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#f1f1f1');
         }
     </script>
+
+    <script>
+        const slideRange = document.getElementById('slideRange');
+        const slideCountValue = document.getElementById('slideCountValue');
+        const container = document.querySelector('.slide-counter-container');
+
+        slideRange.addEventListener('input', function() {
+            slideCountValue.textContent = this.value;
+        });
+
+        slideRange.addEventListener('mousedown', function() {
+            container.classList.add('active');
+        });
+
+        slideRange.addEventListener('mouseup', function() {
+            container.classList.remove('active');
+        });
+
+        slideRange.addEventListener('touchstart', function() {
+            container.classList.add('active');
+        });
+
+        slideRange.addEventListener('touchend', function() {
+            container.classList.remove('active');
+        });
+    </script>
 </body>
 </html>
